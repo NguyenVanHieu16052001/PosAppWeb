@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Quản lý Hàng Hóa</title>
+    <style>
+        .container {
+            display: flex;
+            /* Sử dụng flexbox để sắp xếp các bảng */
+            background-color: #00000090;
+        }
+
+        .tab {
+            overflow: auto;
+            /* Cho phép cuộn nếu nội dung bảng quá lớn */
+        }
+
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid rgba(136, 136, 136, 0.338);
+            padding: 1px 2px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .tab {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+
+        .tab h2 {
+            overflow: auto;
+            background-color: #ffffff;
+            /* Màu nền nhạt cho tab không được chọn */
+            border: 2px solid #000000;
+            /* Viền cho tab */
+            padding: 10px;
+            /* Khoảng cách bên trong tab */
+            transition: box-shadow 1s ease;
+        }
+
+        .tab.active h2 {
+            background-color: #5efed187;
+            /* Màu nền trắng cho tab được chọn */
+            box-shadow: 0 6px 10px rgb(255, 0, 0);
+        }
+
+        table {
+            border-collapse: collapse;
+            background-color: #ffffff;
+        }
+
+
+
+        h2 {
+            margin-bottom: 1px;
+            height: 35px;
+            /* Khoảng cách giữa tiêu đề và bảng */
+        }
+
+        table tr:nth-child(even) {
+            background-color: #cbcbcbaf;
+            /* Màu nền cho hàng chẵn */
+        }
+
+        table tr:nth-child(odd) {
+            background-color: #fff;
+            /* Màu nền cho hàng lẻ (mặc định là trắng) */
+        }
+
+        table th:nth-child(2),
+        table td:nth-child(2) {
+            text-align: right;
+        }
+
+        table td:nth-child(3) {
+            text-align: center;
+            /* background-color: #87edff92; */
+        }
+
+        table th:nth-child(4),
+        table td:nth-child(4) {
+            text-align: right;
+        }
+
+        table th:nth-child(5),
+        table td:nth-child(5) {
+            text-align: right;
+        }
+
+        .overlay {
+            display: none;
+            /* Ẩn theo mặc định */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Màu nền mờ */
+            z-index: 9;
+            /* Đảm bảo lớp phủ nằm dưới hộp thoại xác nhận */
+        }
+
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .confirmation-dialog {
+            /* ... (các kiểu hiện tại) ... */
+            border-radius: 10px;
+            /* Bo tròn các góc */
+            text-align: center;
+            /* Căn giữa nội dung */
+        }
+
+        .confirmation-dialog p {
+            margin-bottom: 20px;
+            /* Khoảng cách giữa văn bản và nút */
+            font-size: 16px;
+            /* Kích thước chữ */
+        }
+
+        .confirmation-dialog button {
+            padding: 10px 20px;
+            /* Kích thước nút */
+            margin: 0 5px;
+            /* Khoảng cách giữa các nút */
+            border: none;
+            /* Loại bỏ viền mặc định */
+            border-radius: 5px;
+            /* Bo tròn các góc nút */
+            cursor: pointer;
+            /* Thay đổi con trỏ khi di chuột qua */
+            font-size: 14px;
+            /* Kích thước chữ */
+        }
+
+        .table-total {
+            position: sticky;
+            bottom: 10px;
+            right: 10px;
+            /* Đặt vào góc phải của bảng */
+        }
+
+        .subcontainer {
+            position: relative;
+            /* Cho phép div con định vị tuyệt đối bên trong */
+            height: 500px;
+        }
+
+        .tab {
+            overflow-y: hidden;
+            height: 80vh;
+        }
+
+        .table-total {
+            color: yellow;
+        }
+
+        .table-total {
+            position: absolute;
+            bottom: -1px;
+            right: 10px;
+        }
+
+        .h2_btn {
+            position: relative;
+        }
+
+        .h2_btn button {
+            position: absolute;
+            right: 0;
+            top: 5px;
+            /* padding: 0 5px; */
+            background-color: #ffffff;
+            border: 1px solid #c3ff00;
+            margin-right: 20px;
+            padding: 10px 20px;
+            /* Kích thước nút */
+            margin: 0 14px;
+            border-radius: 5px;
+            /* Bo tròn các góc nút */
+            cursor: pointer;
+            /* Thay đổi con trỏ khi di chuột qua */
+            font-size: larger;
+            box-shadow: 0 6px 10px rgb(246, 255, 0);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        #soTien {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .qr_code {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .qr_code form {
+            font-size: x-large;
+            display: inline-block;
+            padding: 0;
+            margin: 0;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0 0 0;
+        }
+
+        .qr_code form :focus {
+            background: #abff7787;
+        }
+
+        .qr_code form .biginput {
+            border: none;
+            width: 300px;
+            height: 25px;
+            background-color: #fff;
+            border-radius: 3px;
+            font-weight: normal;
+            font-size: x-large;
+            -webkit-transition: all 0.2s linear;
+            -moz-transition: all 0.2s linear;
+            transition: all 0.2s linear;
+        }
+
+
+        .qr_code form .biginput:focus {
+            color: #000000;
+            background-color: #ccf6e7da;
+        }
+
+        #searchfield {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        #searchfield form {
+            font-size: x-large;
+            display: inline-block;
+            background: #9fff6487;
+            padding: 0;
+            margin: 0;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0 0 0;
+        }
+
+        #searchfield form .biginput {
+            width: 300px;
+            height: 40px;
+            padding: 0 10px 0 10px;
+            background-color: #fff;
+            border: 1px solid #00fb82a2;
+            border-radius: 3px;
+            color: #aeaeae;
+            font-weight: normal;
+            font-size: x-large;
+            -webkit-transition: all 0.2s linear;
+            -moz-transition: all 0.2s linear;
+            transition: all 0.2s linear;
+        }
+
+        #searchfield form .biginput:focus {
+            color: #ff0000;
+        }
+
+        .autocomplete-items {
+            border: 1px solid #000000a2;
+            border-radius: 3px;
+        }
+
+        .sub-autocomplete-items {
+            padding: 5px 0px;
+            border: 1px solid #000000a2;
+            border-radius: 3px;
+        }
+
+        .sub-autocomplete-items :hover {
+            background-color: #ffffff;
+            color: red;
+            border: 1px solid #ff0000a2;
+            border-radius: 3px;
+        }
+
+        .containerNew {
+            display: flex;
+            justify-content: flex-end;
+            align-items: end;
+            flex-direction: column;
+            background-color: #b0dcefbd;
+            gap: 3px;
+            /* Khoảng cách giữa các phần tử */
+        }
+
+        .fixed-total {
+            width: 30vw;
+            padding: 5px 10px;
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            border: 1px solid #ff0000a2;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .fixed-total.right {
+            background-color: #ffff4d;
+            font-weight: bolder;
+            font-size: x-large;
+        }
+    </style>
+    <style>
+        .discount {
+            padding: 5px 10px;
+            width: 30vw;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        #discountSelect::part(listbox) {
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid red;
+            border-radius: 5px;
+        }
+
+        #discountSelect:part(button) {
+            color: white;
+            background-color: #f00;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="hangMua" class="tab active subcontainer">
+            <div class="h2_btn" onclick="toggleTab('hangMua')">
+                <h2>Hàng Mua</h2>
+                <div class="qr_code">
+                    <form onsubmit="handleSubmit(event)"><input type="text" class="biginput" autocomplete="off"
+                            id="myInputhangMua"></form>
+                </div>
+                <button style="background-color: #ffffff; color: rgb(0, 0, 0);" onclick="addNewProduct(event)"
+                    data-bang="1">Thêm hàng mới</button>
+            </div>
+            <div style="overflow-y: auto; max-height: 55vh; min-width: 10vw;">
+                <table id="tableHangMua"></table>
+
+            </div>
+            <div id="totalMua" class="table-total"></div>
+
+        </div>
+        <div id="hangTra" class="tab subcontainer">
+            <div class="h2_btn" onclick="toggleTab('hangTra')">
+                <h2>Hàng Trả</h2>
+                <div class="qr_code">
+                    <form onsubmit="handleSubmit(event)"><input type="text" class="biginput" autocomplete="off"
+                            id="myInputhangTra"></form>
+                </div>
+                <button style="background-color: #ffffff; color: rgb(0, 0, 0);" onclick="addNewProduct(event)"
+                    data-bang="2">Thêm hàng mới</button>
+            </div>
+            <div style="overflow-y: auto; max-height: 55vh; min-width: 10vw;">
+                <table id="tableHangTra"></table>
+
+            </div>
+            <div id="totalTra" class="table-total"></div>
+
+        </div>
+    </div>
+
+
+    <div class="containerNew">
+        <div id="total" class="fixed-total"></div>
+        <div class="discount">
+            <select id="discountSelect">
+                <option value="0">Giảm giá</option>
+                <option value="5">Giảm 5%</option>
+                <option value="10">Giảm 10%</option>
+                <option value="custom">Nhập số tiền</option>
+            </select>
+            <input type="number" id="customDiscount" style="display: none;" placeholder="Số tiền" value="10000">
+        </div>
+
+        <div id="sumTotal" class="fixed-total right">Thành tiền: 0VNĐ</div>
+    </div>
+
+    <div id="confirmationOverlay" class="overlay">
+        <div id="confirmationDialog" class="confirmation-dialog">
+            <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+            <button style="background-color: #f35e6d; color: white;" onclick="confirmDelete()">Xóa</button>
+            <button style="background-color: #0088ff; color: white;" onclick="cancelDelete()">Hủy</button>
+        </div>
+    </div>
+    <div id="formAddNewProduct" class="overlay">
+        <div id="confirmationProduct" class="confirmation-dialog">
+            <p style="font-size: x-large;">Giá tiền</p>
+            <div id="searchfield">
+                <form><input type="text" name="currency" class="biginput" id="autocomplete" autocomplete="off"></form>
+            </div><!-- @end #searchfield -->
+            <button style="background-color: #ffee00; color: rgb(0, 0, 0);" onclick="cancelAddPro()">Hủy</button>
+            <button style="background-color: #0088ff; color: white;" onclick="addPro()">Xong</button>
+        </div>
+    </div>
+    <script>
+        // Quét mã
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const input = tableFocus === "tableHangMua" ? document.getElementById('myInputhangMua').value : document.getElementById('myInputhangTra').value;
+            console.log('QR-INPUT: ' + input);
+            const obj = { product_id: parseInt(input), quantity: 1, price: 0 };
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('Accept', 'application/json');
+            url = tableFocus === "tableHangMua" ? 'http://192.168.1.99:8080/api/cart/add/1' : 'http://192.168.1.99:8080/api/cart/add/2';
+            console.log(url);
+            console.log(obj);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(obj)
+            });
+            if (response.status != 200) {
+                console.error("Không call api được");
+            } else {
+
+                const data = await response.json();
+                console.log(data);
+                generateTable(tableFocus);
+            }
+        }
+        const input = document.getElementById('myInputhangMua');
+        input.focus();
+    </script>
+    <script>
+        //Nhập số tiền hàng mới
+        var currencies = [
+            { value: '10K', data: 10000 },
+            { value: '15K', data: 15000 },
+            { value: '20K', data: 20000 },
+            { value: '25K', data: 25000 },
+            { value: '30K', data: 30000 },
+            { value: '35K', data: 35000 },
+            { value: '40K', data: 40000 },
+            { value: '45K', data: 45000 },
+            { value: '50K', data: 50000 },
+            { value: '55K', data: 55000 },
+            { value: '60K', data: 60000 },
+            { value: '65K', data: 65000 },
+            { value: '70K', data: 70000 },
+            { value: '75K', data: 75000 },
+            { value: '80K', data: 80000 },
+            { value: '85K', data: 85000 },
+            { value: '90K', data: 90000 },
+            { value: '95K', data: 95000 },
+            { value: '100K', data: 100000 },
+            { value: '110K', data: 110000 },
+            { value: '120K', data: 120000 },
+            { value: '130K', data: 130000 },
+            { value: '140K', data: 140000 },
+            { value: '150K', data: 150000 },
+            { value: '160K', data: 160000 },
+            { value: '170K', data: 170000 },
+            { value: '180K', data: 180000 },
+            { value: '190K', data: 190000 },
+            { value: '200K', data: 200000 },
+            { value: '210K', data: 210000 },
+            { value: '220K', data: 220000 },
+            { value: '230K', data: 230000 },
+            { value: '240K', data: 240000 },
+            { value: '250K', data: 250000 },
+            { value: '260K', data: 260000 },
+            { value: '270K', data: 270000 },
+            { value: '280K', data: 280000 },
+            { value: '290K', data: 290000 },
+            { value: '300K', data: 300000 },
+        ];
+        const autocompleteInput = document.getElementById('autocomplete');
+
+        let currentFocus = 0; // Index of the currently focused suggestion
+
+        autocompleteInput.addEventListener('keyup', (event) => {
+            const inputValue = autocompleteInput.value.toLowerCase();
+            let suggestionList = [];
+
+            if (inputValue.length > 0) {
+                currentFocus = 0;
+                suggestionList = currencies.filter(currency => currency.value.toString().startsWith(inputValue));
+            }
+
+            closeAllSuggestions(); // Close any previously opened suggestions
+
+            if (suggestionList.length > 0) {
+                createSuggestionList(suggestionList);
+            }
+        });
+
+        function createSuggestionList(suggestions) {
+            const suggestionDiv = document.createElement('DIV');
+            suggestionDiv.setAttribute('id', 'autocomplete-list');
+            suggestionDiv.setAttribute('class', 'autocomplete-items'); // Add a class for styling if needed
+            autocompleteInput.parentNode.appendChild(suggestionDiv);
+
+            for (let i = 0; i < suggestions.length; i++) {
+                const suggestionItem = document.createElement('DIV');
+                suggestionItem.setAttribute('class', 'sub-autocomplete-items');
+                suggestionItem.innerHTML = `<strong>${suggestions[i].value}</strong>`;
+                suggestionItem.addEventListener('click', () => {
+                    autocompleteInput.value = suggestions[i].data;
+                    addPro();
+                    closeAllSuggestions();
+                });
+                suggestionDiv.appendChild(suggestionItem);
+            }
+
+        }
+
+        function addActive(suggestionDiv) {
+            const items = suggestionDiv.getElementsByTagName('div');
+            if (items.length > 0) {
+                removeActive(suggestionDiv);
+                items[currentFocus].classList.add('active'); 
+            }
+        }
+
+        function removeActive(suggestionDiv) {
+            const items = suggestionDiv.getElementsByTagName('div');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('active');
+            }
+        }
+
+        function closeAllSuggestions() {
+            const suggestionDiv = document.getElementById('autocomplete-list');
+            if (suggestionDiv) {
+                suggestionDiv.parentNode.removeChild(suggestionDiv);
+            }
+        }
+
+        function addNewProduct(event) {
+            document.getElementById("formAddNewProduct").style.display = "block";
+            document.getElementById("confirmationProduct").style.display = "block";
+
+        }
+
+        function cancelAddPro() {
+            document.getElementById("formAddNewProduct").style.display = "none";
+            document.getElementById("confirmationProduct").style.display = "none";
+        }
+        async function addPro() {
+            const donGiaInput = document.getElementById("autocomplete");
+            let donGia = donGiaInput.value.replace(/\D/g, '');
+            if (donGia === "" || parseInt(donGia) <= 0) {
+                alert("Vui lòng nhập đơn giá hợp lệ.");
+                return;
+            }
+
+            const obj = { product_id: 2, quantity: 1, price: parseInt(donGia) };
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('Accept', 'application/json');
+            url = tableFocus === "tableHangMua" ? 'http://192.168.1.99:8080/api/cart/add/1' : 'http://192.168.1.99:8080/api/cart/add/2';
+            console.log(url);
+            console.log(obj);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(obj)
+            });
+            if (response.status != 200) {
+                console.error("Không call api được");
+            } else {
+
+                const data = await response.json();
+            }
+            // Tạo lại bảng
+            generateTable(tableFocus);
+
+            // Đóng form
+            document.getElementById("formAddNewProduct").style.display = "none";
+            document.getElementById("confirmationProduct").style.display = "none";
+            donGiaInput.value = "";
+        }
+        function inputFormatCurrency(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            input.value = value;
+        }
+    </script>
+    <script>
+        //SELECT TAB
+        function toggleTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.id === tabId);
+
+            });
+            if (tabId === "hangTra") {
+                tableFocus = 'tableHangTra';
+                let input = document.getElementById('myInputhangTra');
+                input.focus();
+                console.log(tableFocus);
+            }
+            else {
+                tableFocus = 'tableHangMua';
+                let input = document.getElementById('myInputhangMua');
+                input.focus();
+                console.log(tableFocus);
+            }
+        }
+
+    </script>
+    <script>
+        let dataObj = null;
+        let tableFocus = 'tableHangMua';
+        // Function to generate table rows
+        async function generateTable(tableId) {
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('Accept', 'application/json');
+            url = 'http://192.168.1.99:8080/api/cart';
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers
+            });
+            if (response.status != 200) {
+                console.error("Không call api được");
+            } else {
+                const data = await response.json();
+                cart_data = tableId === "tableHangMua" ? data[0] : data[1];
+                dataObj = Object.entries(cart_data).map(([maSP, [soLuong, donGia]]) => [maSP, "NGUYEN TRUNG", soLuong, donGia, soLuong * donGia, "iconDEL"]);
+            }
+            const table = document.getElementById(tableId);
+            table.innerHTML = null;
+            table.innerHTML = `<tr>
+                                    <th style="width: 100px; text-align: right;">Mã SP</th>
+                                    <th style="width: 200px; text-align: right;">Tên SP</th>
+                                    <th style="width: 5px; text-align: right;">SL</th>
+                                    <th style="width: 180px;">Đơn giá</th>
+                                    <th style="width: 180px;">Thành tiền</th>
+                                    <th style="width: 32px;">Xóa</th>
+                                </tr>`;
+            let total = 0;
+            dataObj.forEach(row => {
+                const newRow = table.insertRow();
+                row.forEach((cellData, index) => {
+                    const cell = newRow.insertCell();
+                    if (index === 2) {  // Editable cell for quantity
+                        cell.innerHTML = `<span contenteditable="true" 
+                        data-bang="${tableId === 'tableHangMua' ? '1' : '2'}" 
+                        data-ma-san-pham="${row[0]}"
+                        data-don-gia="${row[3]}"
+                        class="editable-cell">${cellData}</span>`;
+                    } else if (index === 5) {
+                        cell.innerHTML = `<img src="icon/delete-left-solid.svg" 
+                        id="${row[0]}" 
+                        onclick="handleDelete(event)" 
+                        alt="Xóa" 
+                        width="32" 
+                        height="32"
+                        data-bang="${tableId === 'tableHangMua' ? '1' : '2'}" 
+                        data-ma-san-pham="${row[0]}" 
+                        data-so-luong="${row[2]}" 
+                        data-don-gia="${row[3]}"
+                    />`;
+                    } else if (index === 3 || index === 4) { // Định dạng cột đơn giá và thành tiền
+                        cell.textContent = formatCurrency(cellData);
+                    }
+                    else {
+                        cell.textContent = cellData;
+                    }
+                });
+                total += row[4];
+
+            });
+            const editableCells = document.querySelectorAll('.editable-cell');
+            editableCells.forEach(cell => {
+                cell.addEventListener('input', (event) => {
+                    const newValue = event.target.textContent;
+                    if (newValue.trim() === '' || !/^\d+$/.test(newValue)) {
+                        return;
+                    }
+                    updatePro(newValue, event.target.dataset.maSanPham, event.target.dataset.bang);
+
+                });
+            });
+            async function updatePro(soLuong, idSP, idTable) {
+                let headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('Accept', 'application/json');
+                url = 'http://192.168.1.99:8080/api/cart/update/' + idSP + '/' + idTable + '/' + soLuong;
+                console.log(url);
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify()
+                });
+                if (response.status != 200) {
+                    console.error("Không call api được");
+                } else {
+                    if (idTable == 1) {
+                        generateTable("tableHangMua");
+                    }
+                    else {
+                        generateTable("tableHangTra");
+                    }
+
+                }
+            }
+            const totalContainer = tableId === "tableHangMua" ? document.getElementById("totalMua") : document.getElementById("totalTra");
+            str = tableId === "tableHangMua" ? "Mua" : "Trả";
+            totalContainer.textContent = `${str} ${formatCurrency(total)}`;
+            updateTotal();
+        }
+        let productIdToDelete = null;
+        function updateTotal() {
+            const totalContainerMua = parseInt(document.getElementById("totalMua").textContent.replaceAll(".", "").split(" ", 100)[1]);
+            const totalContainerTra = parseInt(document.getElementById("totalTra").textContent.replaceAll(".", "").split(" ", 100)[1]);
+            const totalSumContainer = document.getElementById("total");
+            totalSumContainer.textContent = `Tổng cộng: ${formatCurrency(totalContainerMua - totalContainerTra)} VND`;
+        }
+
+        function handleDelete(event) {
+            const icon = event.target;
+            productIdToDelete = icon.dataset.maSanPham;
+            tableFocus = icon.dataset.bang === '1' ? 'tableHangMua' : 'tableHangTra';
+            soLuongToDelete = icon.dataset.soLuong;
+            donGiaToDelete = icon.dataset.donGia;
+
+            // Hiển thị lớp phủ và hộp thoại xác nhận
+            document.getElementById("confirmationOverlay").style.display = "block";
+            document.getElementById("confirmationDialog").style.display = "block";
+
+            // Cập nhật nội dung của hộp thoại xác nhận
+            const confirmationText = document.querySelector("#confirmationDialog p");
+            confirmationText.textContent = `Bạn có chắc chắn muốn xóa ${soLuongToDelete} sản phẩm ${productIdToDelete} với đơn giá ${formatCurrency(donGiaToDelete)} VNĐ từ bảng Hàng ${tableFocus == "tableHangMua" ? "Mua" : "Trả"}?`;
+        }
+
+        async function confirmDelete() {
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('Accept', 'application/json');
+            url = tableFocus === "tableHangMua" ? 'http://192.168.1.99:8080/api/cart/remove/' + productIdToDelete + '/1' : 'http://192.168.1.99:8080/api/cart/remove/' + productIdToDelete + '/2';
+            console.log(url);
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: headers,
+                body: JSON.stringify()
+            });
+            if (response.status != 200) {
+                console.error("Không call api được");
+            } else {
+
+                const data = await response.json();
+                console.log(data);
+            }
+            generateTable(tableFocus);
+            // Ẩn lớp phủ và hộp thoại xác nhận
+            document.getElementById("confirmationOverlay").style.display = "none";
+            document.getElementById("confirmationDialog").style.display = "none";
+        }
+
+        function cancelDelete() {
+            // Ẩn lớp phủ và hộp thoại xác nhận
+            document.getElementById("confirmationOverlay").style.display = "none";
+            document.getElementById("confirmationDialog").style.display = "none";
+        }
+
+
+        // Initial table generation
+        generateTable("tableHangMua");
+        generateTable("tableHangTra");
+
+        // ... (your toggleTab and editableCells logic) ... 
+        function formatCurrency(number) {
+            return number.toLocaleString('vi-VN'); // Định dạng theo chuẩn Việt Nam
+        }
+    </script>
+    <script>
+        //Phần thanh toán
+        const discountSelect = document.getElementById('discountSelect');
+        const customDiscountInput = document.getElementById('customDiscount');
+
+        discountSelect.addEventListener('change', () => {
+            if (discountSelect.value === 'custom') {
+                customDiscountInput.style.display = 'block';
+            } else {
+                customDiscountInput.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
