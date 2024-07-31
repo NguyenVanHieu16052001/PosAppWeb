@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body { font-family: sans-serif; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .total { font-weight: bold; }
+    #total-container {
+        position: fixed;
+        bottom: 20px; /* Điều chỉnh khoảng cách từ dưới lên */
+        right: 20px;  /* Điều chỉnh khoảng cách từ phải qua */
+        background-color: #e1ccb1; /* Màu nền tùy chọn */
+        color: rgb(0, 0, 0);
+        font-size: xx-large;
+        font-weight: 700;
+        padding: 10px;
+        border-radius: 5px; /* Bo góc tùy chọn */
+    }
+    .delete-icon {
+        color: red;
+        cursor: pointer;
+    }
+
+</style>
+</head>
+<body>
+
+<h2>Hóa Đơn</h2>
+
+<table>
+  <tr>
+    <th>SL</th>
+    <th>Đơn giá</th>
+    <th>Thành tiền</th>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>25.000</td>
+    <td>50.000</td>
+    <td><i class="fas fa-trash delete-icon"></i></td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>15.000</td>
+    <td>15.000</td>
+    <td><i class="fas fa-trash delete-icon"></i></td>
+  </tr>
+</table>
+
+<div id="total-container">
+    Tổng cộng: <span id="total-amount">65.000</span>
+</div>
+<div id="confirm-dialog" style="display: none;">
+    Bạn có chắc chắn muốn xóa <span id="delete-quantity"></span> sản phẩm với giá <span id="delete-price"></span>?
+    <button id="confirm-delete">Xóa</button>
+    <button id="cancel-delete">Hủy</button>
+</div>
+<script>
+    const deleteIcons = document.querySelectorAll('.delete-icon');
+    const confirmDialog = document.getElementById('confirm-dialog');
+    const deleteQuantity = document.getElementById('delete-quantity');
+    const deletePrice = document.getElementById('delete-price');
+
+    deleteIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+        const row = icon.parentNode.parentNode; // Lấy dòng chứa biểu tượng
+        const quantity = row.cells[0].textContent; // Lấy số lượng
+        const price = row.cells[2].textContent;   // Lấy thành tiền
+
+        deleteQuantity.textContent = quantity;
+        deletePrice.textContent = price;
+        confirmDialog.style.display = 'block';
+    });
+    });
+</script>
+</body>
+</html>
